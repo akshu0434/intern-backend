@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Intern Leaderboard</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+:root {
+      --primary-color: #4a90e2;
+      --background-gradient: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 25%, #fad0c4 50%, #a18cd1 75%, #fbc2eb 100%);
+      --card-bg-light: #ffffff;
+      --card-bg-dark: #1e1e2f;
+      --text-color-light: #333;
+      --text-color-dark: #ddd;
+      --shadow-light: rgba(0, 0, 0, 0.1);
+      --shadow-dark: rgba(0, 0, 0, 0.7);
+    }
+    [data-theme="light"] {
+      background: var(--background-gradient);
+      color: var(--text-color-light);
+    }
+    [data-theme="dark"] {
+      background: #121212;
+      color: var(--text-color-dark);
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      width: 100%;
+      padding: 1rem 2rem;
+      background: var(--primary-color);
+      color: white;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.8rem;
+      box-shadow: 0 2px 8px var(--shadow-light);
+      position: relative;
+    }
+    main {
+      max-width: 700px;
+      width: 90%;
+      margin: 2rem auto;
+      background: var(--card-bg-light);
+      border-radius: 12px;
+      box-shadow: 0 8px 20px var(--shadow-light);
+      padding: 2rem;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    [data-theme="dark"] main {
+      background: var(--card-bg-dark);
+      box-shadow: 0 8px 20px var(--shadow-dark);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1.1rem;
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background: #e9ecef;
+      cursor: pointer;
+      user-select: none;
+    }
+    [data-theme="dark"] th {
+      background: #2a2a3d;
+    }
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 1rem 0;
+      font-size: 0.9rem;
+      color: var(--text-color-light);
+      background: var(--primary-color);
+      font-weight: 600;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+    }
+    [data-theme="dark"] footer {
+      color: var(--text-color-dark);
+      background: #222;
+    }
+    /* Dark mode toggle button */
+    #darkModeToggle {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      background: white;
+      border: none;
+      border-radius: 20px;
+      padding: 0.4rem 1rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--primary-color);
+      box-shadow: 0 2px 6px var(--shadow-light);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    #darkModeToggle:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+    [data-theme="dark"] #darkModeToggle {
+      background: var(--primary-color);
+      color: white;
+      box-shadow: 0 2px 6px var(--shadow-dark);
+    }
+    [data-theme="dark"] #darkModeToggle:hover {
+      background: white;
+      color: var(--primary-color);
+    }
+    @media (max-width: 600px) {
+      main {
+        width: 95%;
+        padding: 1rem;
+      }
+    }
+  </style>
+  <link rel="icon" href="favicon.ico" />
+</head>
+<body>
+  <header>
+    Intern Leaderboard
+    <button id="darkModeToggle" aria-label="Toggle dark mode">Dark Mode</button>
+  </header>
+  <main>
+    <table>
+      <thead>
+        <tr>
+          <th id="nameHeader" tabindex="0" aria-sort="none" role="columnheader" aria-label="Intern Name: activate to sort">Intern Name</th>
+          <th id="donationHeader" tabindex="0" aria-sort="none" role="columnheader" aria-label="Total Donation: activate to sort">Total Donation</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body">
+        <tr><td colspan="2">Loading...</td></tr>
+      </tbody>
+    </table>
+  </main>
+  <footer>
+    Designed by Akshay Gujar | Intern Dashboard Project
+  </footer>
+  <script>
+    let leaderboardData = [];
+
+    async function fetchLeaderboard() {
+      try {
+        const response = await fetch('http://localhost:5001/api/leaderboard');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        leaderboardData = await response.json();
+        renderTable(leaderboardData);
+      } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        const tbody = document.getElementById('leaderboard-body');
+        tbody.innerHTML = '<tr><td colspan="2">Error loading data</td></tr>';
+      }
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('leaderboard-body');
+      tbody.innerHTML = '';
+      data.forEach(intern => {
+        const tr = document.createElement('tr');
+        const nameTd = document.createElement('td');
+        nameTd.textContent = intern.name;
+        const donationTd = document.createElement('td');
+        donationTd.textContent = '$' + intern.totalDonation;
+        tr.appendChild(nameTd);
+        tr.appendChild(donationTd);
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Sorting functionality
+    const nameHeader = document.getElementById('nameHeader');
+    const donationHeader = document.getElementById('donationHeader');
+    let sortDirection = {
+      name: null,
+      donation: null
+    };
+
+    nameHeader.addEventListener('click', () => {
+      sortDirection.name = sortDirection.name === 'asc' ? 'desc' : 'asc';
+      sortDirection.donation = null;
+      leaderboardData.sort((a, b) => {
+        if (a.name < b.name) return sortDirection.name === 'asc' ? -1 : 1;
+        if (a.name > b.name) return sortDirection.name === 'asc' ? 1 : -1;
+        return 0;
+      });
+      updateAriaSort(nameHeader);
+      updateAriaSort(donationHeader, true);
+      renderTable(leaderboardData);
+    });
+
+    donationHeader.addEventListener('click', () => {
+      sortDirection.donation = sortDirection.donation === 'asc' ? 'desc' : 'asc';
+      sortDirection.name = null;
+      leaderboardData.sort((a, b) => {
+        return sortDirection.donation === 'asc' ? a.totalDonation - b.totalDonation : b.totalDonation - a.totalDonation;
+      });
+      updateAriaSort(donationHeader);
+      updateAriaSort(nameHeader, true);
+      renderTable(leaderboardData);
+    });
+
+    function updateAriaSort(element, reset = false) {
+      if (reset) {
+        element.setAttribute('aria-sort', 'none');
+      } else {
+        element.setAttribute('aria-sort', sortDirection[element.id === 'nameHeader' ? 'name' : 'donation']);
+      }
+    }
+
+    fetchLeaderboard();
+
+    // Dark mode toggle
+    const toggleBtn = document.getElementById('darkModeToggle');
+    toggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        toggleBtn.textContent = 'Light Mode';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        toggleBtn.textContent = 'Dark Mode';
+      }
+    });
+  </script>
+</body>
+</html>

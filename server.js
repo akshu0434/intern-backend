@@ -33,7 +33,7 @@ app.get('/api/leaderboard', (req, res) => {
 
 // Serve login.html on root route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/login.html'));
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 app.listen(PORT, () => {
